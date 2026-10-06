@@ -1,0 +1,58 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Add a Viper Dynamics device",
+        "description": "Enter the IP address or hostname of the device (for example P4X-1A2.local).",
+        "data": { "host": "Host" }
+      },
+      "zeroconf_confirm": {
+        "title": "Viper Dynamics device found",
+        "description": "Do you want to add **{name}** to Home Assistant?\n\n{image}"
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not reach the device. Make sure it is on and running firmware with Home Assistant support."
+    },
+    "abort": {
+      "already_configured": "This device is already configured.",
+      "cannot_connect": "Could not reach the device.",
+      "not_viper_device": "The discovered device did not identify itself as a Viper Dynamics device."
+    }
+  },
+  "entity": {
+    "select": {
+      "mode": { "name": "Mode" },
+      "clock_anim": { "name": "Clock animation" },
+      "mascot": { "name": "Mascot" }
+    },
+    "number": {
+      "brightness": { "name": "Brightness" },
+      "volume": { "name": "Volume" },
+      "alarm_volume": { "name": "Alarm volume" },
+      "rotation": { "name": "Screen tilt" }
+    },
+    "switch": {
+      "backlight_auto": { "name": "Automatic brightness" },
+      "sound": { "name": "Sound" }
+    },
+    "cover": {
+      "gate": { "name": "Gate" }
+    },
+    "button": {
+      "alarm_test": { "name": "Test alarm" },
+      "alarm_ack": { "name": "Dismiss alarm" },
+      "restart": { "name": "Restart" }
+    },
+    "sensor": {
+      "player": { "name": "Player" }
+    },
+    "update": {
+      "firmware": { "name": "Firmware" }
+    },
+    "image": {
+      "product_photo": { "name": "Product photo" }
+    }
+  }
+}
