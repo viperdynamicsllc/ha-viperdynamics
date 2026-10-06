@@ -30,6 +30,7 @@ Model slugs: `stargate_p1s`, `stargate_p3m`, `stargate_p4x`, `nether_portal`,
   "model_name": "Stargate P4X",
   "id": "a1b2c3d4e5f6",
   "name": "P4X-1A2",
+  "mac": "9c:13:9e:d6:db:28",
   "fw": "2.0.58",
   "api": 1,
   "capabilities": ["mode", "brightness", "backlight_auto", "alarm_volume", "rotation",
@@ -40,6 +41,9 @@ Model slugs: `stargate_p1s`, `stargate_p3m`, `stargate_p4x`, `nether_portal`,
   "rotation_max": 10
 }
 ```
+
+`id` is derived from the chip's factory MAC and never changes. `mac` is the Wi-Fi MAC the
+router sees, which differs from `id` on ESP32-P4 boards (Wi-Fi runs on a companion chip).
 
 Optional option lists, present only with the matching capability:
 `clock_anims` (array of strings), `mascots` (array of strings).

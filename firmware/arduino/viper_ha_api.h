@@ -11,6 +11,7 @@
 #include <ArduinoJson.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPmDNS.h>
+#include <WiFi.h>
 #include <esp_mac.h>
 
 #define VIPER_HA_API_VERSION 1
@@ -73,6 +74,9 @@ static void viperHaBegin(AsyncWebServer &server, const ViperHaDevice &dev, const
     info["model_name"] = s_viperHa->modelName;
     info["id"] = viperHaId();
     info["name"] = s_viperHaName;
+    String mac = WiFi.macAddress();  // radio MAC, as the router sees it
+    mac.toLowerCase();
+    info["mac"] = mac;
     info["fw"] = s_viperHa->fw;
     info["api"] = VIPER_HA_API_VERSION;
     s_viperHa->fillInfo(info);

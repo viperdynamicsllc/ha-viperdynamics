@@ -18,12 +18,11 @@ class ViperEntity(CoordinatorEntity[ViperCoordinator]):
         super().__init__(coordinator)
         info = coordinator.info
         device_id = info["id"]
-        mac = ":".join(device_id[i : i + 2] for i in range(0, 12, 2))
         self._attr_unique_id = f"{device_id}_{key}"
         self._attr_translation_key = key
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device_id)},
-            connections={(CONNECTION_NETWORK_MAC, mac)},
+            connections={(CONNECTION_NETWORK_MAC, info["mac"])} if info.get("mac") else set(),
             manufacturer=MANUFACTURER,
             model=info.get("model_name") or MODEL_NAMES.get(info.get("model", ""), "Unknown"),
             name=info.get("name"),

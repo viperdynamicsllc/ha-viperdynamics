@@ -13,6 +13,7 @@ INFO = {
     "model_name": "Stargate P4X",
     "id": "a1b2c3d4e5f6",
     "name": "P4X-1A2",
+    "mac": "9c:13:9e:d6:db:28",
     "fw": "2.0.58",
     "api": 1,
     "capabilities": ["mode", "brightness", "backlight_auto", "alarm_volume", "rotation",
