@@ -2,14 +2,16 @@
 
 Discover and control Viper Dynamics smart displays from Home Assistant over your local network.
 
-| Device | Controls |
-|---|---|
-| Stargate P1S | Gate open/close, mode, dismiss alarm |
-| Stargate P3M | Mode, brightness, automatic brightness, alarm volume, test alarm, firmware updates |
-| Stargate P4X | Mode, brightness, automatic brightness, screen tilt, alarm volume, test alarm, firmware updates |
-| Nether Portal | Mode, brightness, clock animation, player |
-| Nether Portal 7 Pro | Mode, brightness, volume, alarm volume, sound, clock animation, firmware updates |
-| WoW Dark Portal | Mode, brightness, mascot, character |
+| Device | Firmware with HA support | Controls |
+|---|---|---|
+| Stargate P1S | 1.1.0 | Gate open/close, mode, brightness / screen off, dismiss alarm, restart |
+| Stargate P3M | 7.0.3 | Mode, brightness / screen off, auto-brightness, alarm volume, test/dismiss alarm, restart, firmware updates |
+| Stargate P4X | 2.0.61 | Mode, brightness / screen off, auto-brightness, screen tilt, alarm volume, test/dismiss alarm, restart, firmware updates |
+| Nether Portal | 1.2.0 | Mode, brightness / screen off, auto-dim, player stats, restart |
+| Nether Portal 7 Pro | 2.1.31 | Mode, brightness / screen off, auto-dim, volume, alarm volume, sound, test/dismiss alarm, restart, firmware update notices |
+| WoW Dark Portal | v8+ | Mode, brightness / screen off, auto-dim, mascot, character sheet, restart |
+
+Setting brightness to 0 turns the screen fully off; touching the screen (on touch models) or raising the brightness turns it back on.
 
 The integration builds entities from what each device reports, so features can vary with firmware version.
 

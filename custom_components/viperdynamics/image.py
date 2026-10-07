@@ -21,8 +21,13 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     coordinator = entry.runtime_data
-    path = IMAGES_DIR / f"{coordinator.info.get('model', '')}.png"
-    photo = await hass.async_add_executor_job(lambda: path.read_bytes() if path.is_file() else None)
+    model = coordinator.info.get("model", "")
+    # <model>_card.png keeps the product inside the center square of a 16:9
+    # canvas, so neither a 16:9 nor a square card crop cuts it off.
+    paths = (IMAGES_DIR / f"{model}_card.png", IMAGES_DIR / f"{model}.png")
+    photo = await hass.async_add_executor_job(
+        lambda: next((p.read_bytes() for p in paths if p.is_file()), None)
+    )
     if photo:
         async_add_entities([ViperProductImage(hass, coordinator, photo)])
 

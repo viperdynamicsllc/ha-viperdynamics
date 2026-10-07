@@ -25,18 +25,20 @@ async def async_setup_entry(
 
 
 class ViperUpdate(ViperEntity, UpdateEntity):
-    _attr_supported_features = (
-        UpdateEntityFeature.INSTALL
-        | UpdateEntityFeature.PROGRESS
-        | UpdateEntityFeature.RELEASE_NOTES
-    )
-
     def __init__(self, coordinator: ViperCoordinator) -> None:
         super().__init__(coordinator, "firmware")
 
     @property
     def _update(self) -> dict[str, Any]:
         return self.coordinator.data.get("update") or {}
+
+    @property
+    def supported_features(self) -> UpdateEntityFeature:
+        features = UpdateEntityFeature.RELEASE_NOTES
+        # Devices that can only be updated from their own web page say so.
+        if self._update.get("can_install", True):
+            features |= UpdateEntityFeature.INSTALL | UpdateEntityFeature.PROGRESS
+        return features
 
     @property
     def installed_version(self) -> str | None:

@@ -36,7 +36,7 @@ Model slugs: `stargate_p1s`, `stargate_p3m`, `stargate_p4x`, `nether_portal`,
   "capabilities": ["mode", "brightness", "backlight_auto", "alarm_volume", "rotation",
                    "alarm_test", "restart", "ota"],
   "modes": ["Clock", "Continuous Stargate", "Photo Frame"],
-  "brightness_min": 22,
+  "brightness_min": 0,
   "rotation_min": -10,
   "rotation_max": 10
 }
@@ -55,7 +55,7 @@ Returns only keys for the device's capabilities.
 | Key | Capability | Type | Notes |
 |---|---|---|---|
 | `mode` | `mode` | int | Index into `info.modes`. |
-| `brightness` | `brightness` | int 0–100 | Current manual brightness. |
+| `brightness` | `brightness` | int 0–100 | Current manual brightness; `0` while the backlight is off. |
 | `backlight_auto` | `backlight_auto` | bool | Automatic (sunrise/sunset) backlight. |
 | `volume` | `volume` | int 0–100 | Media/sound volume. |
 | `alarm_volume` | `alarm_volume` | int 0–100 | |
@@ -66,7 +66,7 @@ Returns only keys for the device's capabilities.
 | `mascot` | `mascot` | string | One of `info.mascots`. |
 | `player` | `player` | object | Game character info; free-form string/number fields. `name` is the headline value. |
 | `alarm_active` | `alarm_ack` | bool | An alarm is ringing and can be dismissed. |
-| `update` | `ota` | object | `{"installed": str, "latest": str\|null, "notes": str, "in_progress": bool, "percent": int}` |
+| `update` | `ota` | object | `{"installed": str, "latest": str\|null, "notes": str, "in_progress": bool, "percent": int, "can_install": bool}`. `can_install` defaults to true; send false when the device can only be updated from its own web page. |
 
 ## `POST /api/control`
 
@@ -80,7 +80,7 @@ so `update.latest` fills in shortly after Home Assistant connects.
 | Key | Value |
 |---|---|
 | `mode` | int |
-| `brightness` | int (clamped to `brightness_min`..100). Turns `backlight_auto` off unless the same request sets it. |
+| `brightness` | int 0–100. `0` turns the backlight fully off (see below). Other values set the manual level, raised to the panel's lowest usable level if needed, and turn `backlight_auto` off unless the same request sets it. |
 | `backlight_auto` | bool |
 | `volume`, `alarm_volume` | int 0–100 |
 | `sound` | bool |
@@ -88,6 +88,18 @@ so `update.latest` fills in shortly after Home Assistant connects.
 | `gate` | `"open"` \| `"close"` \| `"toggle"` |
 | `clock_anim`, `mascot` | string |
 | `action` | `"alarm_test"` \| `"alarm_ack"` \| `"restart"` \| `"install_update"` (each needs the same-named capability; `install_update` needs `ota`) |
+
+### Backlight off (required for every device with `brightness`)
+
+Every device with a backlight must let Home Assistant turn it fully off, and report
+`brightness_min: 0` so the Home Assistant slider reaches 0.
+
+- `brightness: 0` turns the backlight off without changing the saved level or `backlight_auto`.
+- Any `brightness` > 0, `backlight_auto: true`, or a brightness/auto change from the device's
+  web UI turns it back on.
+- A touch on the screen wakes it; that touch is not passed to the UI.
+- A ringing alarm lights the screen while it rings, then it goes dark again.
+- The off state is not saved, so the screen is always on after a power cycle.
 
 Example:
 

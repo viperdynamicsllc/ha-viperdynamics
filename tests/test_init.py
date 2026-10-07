@@ -22,7 +22,7 @@ async def test_entities_from_capabilities(hass: HomeAssistant, mock_client) -> N
 
     assert hass.states.get("select.p4x_1a2_mode").state == "Continuous Stargate"
     assert hass.states.get("number.p4x_1a2_brightness").state == "80"
-    assert hass.states.get("number.p4x_1a2_brightness").attributes["min"] == 22
+    assert hass.states.get("number.p4x_1a2_brightness").attributes["min"] == 0
     assert hass.states.get("switch.p4x_1a2_automatic_brightness").state == "off"
     assert hass.states.get("cover.p4x_1a2_gate").state == "closed"
     assert hass.states.get("update.p4x_1a2_firmware").state == "on"
@@ -49,6 +49,13 @@ async def test_control(hass: HomeAssistant, mock_client) -> None:
     mock_client.control.assert_awaited_with(brightness=55)
 
     await hass.services.async_call(
+        "number", "set_value",
+        {"entity_id": "number.p4x_1a2_brightness", "value": 0}, blocking=True,
+    )
+    mock_client.control.assert_awaited_with(brightness=0)
+    assert hass.states.get("number.p4x_1a2_brightness").state == "0"
+
+    await hass.services.async_call(
         "cover", "open_cover", {"entity_id": "cover.p4x_1a2_gate"}, blocking=True
     )
     mock_client.control.assert_awaited_with(gate="open")
@@ -57,6 +64,14 @@ async def test_control(hass: HomeAssistant, mock_client) -> None:
         "button", "press", {"entity_id": "button.p4x_1a2_test_alarm"}, blocking=True
     )
     mock_client.control.assert_awaited_with(action="alarm_test")
+
+
+async def test_update_without_install(hass: HomeAssistant, mock_client) -> None:
+    state = mock_client.get_state.return_value
+    state["update"]["can_install"] = False
+    await _setup(hass)
+    attrs = hass.states.get("update.p4x_1a2_firmware").attributes
+    assert not attrs["supported_features"] & 1  # UpdateEntityFeature.INSTALL
 
 
 async def test_unload(hass: HomeAssistant, mock_client) -> None:

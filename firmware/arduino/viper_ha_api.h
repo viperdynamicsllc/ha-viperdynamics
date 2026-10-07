@@ -4,7 +4,8 @@
 // Copy this file into an Arduino/ESPAsyncWebServer firmware, then:
 //   1. Fill a ViperHaDevice with the model, version and three callbacks.
 //   2. Call viperHaBegin(server, device, hostname) where the other routes are registered.
-//   3. Call viperHaAdvertise() right after MDNS.begin() / MDNS.addService("http", ...).
+//   3. Call viperHaAdvertise(device) right after MDNS.begin() / MDNS.addService("http", ...).
+//      It takes the device itself because mDNS usually starts before the web server task.
 // Callbacks run on the async_tcp task, like any other route handler.
 #pragma once
 
@@ -30,7 +31,15 @@ struct ViperHaDevice {
 };
 
 static const ViperHaDevice *s_viperHa = nullptr;
-static String s_viperHaName;
+// Points at the firmware's hostname (a String or a char buffer), which may be
+// filled in after viperHaBegin(), so it is read on every request.
+static const String *s_viperHaName = nullptr;
+static const char *s_viperHaNameC = nullptr;
+
+static const char *viperHaHostname() {
+  if (s_viperHaName) return s_viperHaName->c_str();
+  return s_viperHaNameC ? s_viperHaNameC : "";
+}
 
 // Full factory MAC, the same one hostnames are derived from: stable per unit.
 static String viperHaId() {
@@ -62,9 +71,20 @@ static void viperHaSendError(AsyncWebServerRequest *req, int code, const char *m
   viperHaSendJson(req, code, doc);
 }
 
+static void viperHaRoutes(AsyncWebServer &server, const ViperHaDevice &dev);
+
 static void viperHaBegin(AsyncWebServer &server, const ViperHaDevice &dev, const String &hostname) {
+  s_viperHaName = &hostname;
+  viperHaRoutes(server, dev);
+}
+
+static void viperHaBegin(AsyncWebServer &server, const ViperHaDevice &dev, const char *hostname) {
+  s_viperHaNameC = hostname;
+  viperHaRoutes(server, dev);
+}
+
+static void viperHaRoutes(AsyncWebServer &server, const ViperHaDevice &dev) {
   s_viperHa = &dev;
-  s_viperHaName = hostname;
 
   server.on("/api/info", HTTP_GET, [](AsyncWebServerRequest *req) {
     JsonDocument doc;
@@ -73,7 +93,7 @@ static void viperHaBegin(AsyncWebServer &server, const ViperHaDevice &dev, const
     info["model"] = s_viperHa->model;
     info["model_name"] = s_viperHa->modelName;
     info["id"] = viperHaId();
-    info["name"] = s_viperHaName;
+    info["name"] = viperHaHostname();
     String mac = WiFi.macAddress();  // radio MAC, as the router sees it
     mac.toLowerCase();
     info["mac"] = mac;
@@ -119,11 +139,10 @@ static void viperHaBegin(AsyncWebServer &server, const ViperHaDevice &dev, const
 }
 
 // Advertise _viperdyn._tcp so Home Assistant discovers the device.
-static void viperHaAdvertise() {
-  if (!s_viperHa) return;
-  MDNS.addService("viperdyn", "tcp", 80);
+static void viperHaAdvertise(const ViperHaDevice &dev) {
+  if (!MDNS.addService("viperdyn", "tcp", 80)) return;
   MDNS.addServiceTxt("viperdyn", "tcp", "id", viperHaId().c_str());
-  MDNS.addServiceTxt("viperdyn", "tcp", "model", s_viperHa->model);
-  MDNS.addServiceTxt("viperdyn", "tcp", "fw", s_viperHa->fw);
+  MDNS.addServiceTxt("viperdyn", "tcp", "model", dev.model);
+  MDNS.addServiceTxt("viperdyn", "tcp", "fw", dev.fw);
   MDNS.addServiceTxt("viperdyn", "tcp", "api", String(VIPER_HA_API_VERSION).c_str());
 }

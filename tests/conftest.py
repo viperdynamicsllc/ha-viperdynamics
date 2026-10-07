@@ -19,7 +19,7 @@ INFO = {
     "capabilities": ["mode", "brightness", "backlight_auto", "alarm_volume", "rotation",
                      "alarm_test", "restart", "ota", "gate"],
     "modes": ["Clock", "Continuous Stargate", "Photo Frame"],
-    "brightness_min": 22,
+    "brightness_min": 0,
     "rotation_min": -10,
     "rotation_max": 10,
 }
