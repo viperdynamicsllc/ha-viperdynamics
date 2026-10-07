@@ -1,12 +1,12 @@
-"""Home Assistant pages for Viper Dynamics user manuals and quick starts.
+"""Home Assistant chapter for Viper Dynamics user manuals, plus a quick-start pointer to it.
 
 Shared by every product's gen_docs.py (copy this file next to it). The
 generator passes its own helpers and colours, so the pages match each
 product's look:
 
-    from ha_docs import manual_section, quickstart_page
+    from ha_docs import manual_section, quickstart_pointer
     manual_section("9", h1, h2, p, bl, story, callout, ST, HA_INFO)
-    quickstart_page(c, globals(), HA_INFO)   # after the first page is drawn
+    quickstart_pointer(c, globals(), qx - 14, PH - 87)   # under the QR header text
 
 HA_INFO describes the product:
 
@@ -113,172 +113,16 @@ def manual_section(num, h1, h2, p, bl, story, callout, ST, info):
     p(_firmware_text(info))
 
 
-# ── quick start page 2 ────────────────────────────────────────────────────────
+# ── quick start pointer ───────────────────────────────────────────────────────
 
-def _pick(g, *names):
-    for n in names:
-        if n in g:
-            return g[n]
-    raise KeyError(names[0])
+def quickstart_pointer(c, g, x_right, y):
+    """One line under the quick start's header block pointing to the manual.
 
-
-def quickstart_page(c, g, info):
-    """Draw a Home Assistant page as page 2 of a quick-start canvas."""
-    from reportlab.lib.colors import HexColor, white
-
-    PW, PH, ML, MR, CW = g["PW"], g["PH"], g["ML"], g["MR"], g["CW"]
-    HEADER, CARD, GOLD, GOLD_DIM, GOLD_DK = g["HEADER"], g["CARD"], g["GOLD"], g["GOLD_DIM"], g["GOLD_DK"]
-    PARCH, INK, MUTED, PAGE = g["PARCH"], g["INK"], g["MUTED"], g["PAGE"]
-    ACCENT = _pick(g, "PORTAL", "FEL")
-    ACCENT_DK = _pick(g, "PORTAL_DK", "FEL_DIM")
-    GOOD = _pick(g, "GRASS", "ALLIANCE")
-    WARN = _pick(g, "WARN_RED", "HORDE")
-    rounded, section_bar, wrap_text = g["rounded"], g["section_bar"], g["wrap_text"]
-    name = info["name"]
-
-    c.showPage()
-    c.setFillColor(PAGE)
-    c.rect(0, 0, PW, PH, fill=1, stroke=0)
-
-    c.setFillColor(HEADER)
-    c.setFont("Times-Bold", 22)
-    c.drawString(ML, PH - 36, name.upper())
-    c.setFillColor(ACCENT_DK)
-    c.setFont("Times-Bold", 9)
-    c.drawString(ML, PH - 50, "HOME ASSISTANT")
-    c.setFillColor(GOLD_DK)
-    c.setFont("Times-Italic", 13)
-    c.drawString(ML, PH - 68, "Smart Home Setup")
-    c.setFillColor(MUTED)
-    c.setFont("Times-Roman", 8)
-    c.drawString(ML, PH - 82, "Viper Dynamics LLC  ·  Works with Home Assistant " + HA_MIN + "+ via HACS")
-    c.setFillColor(HEADER)
-    c.setFont("Times-Bold", 8)
-    c.drawRightString(PW - MR, PH - 40, "Local control, no cloud")
-    c.setFillColor(MUTED)
-    c.setFont("Times-Roman", 6.5)
-    c.drawRightString(PW - MR, PH - 52, "Firmware " + info["min_fw"] + " or newer")
-    c.drawRightString(PW - MR, PH - 62, "Full details: " + info["manual"])
-
-    rule_y = PH - 96
-    c.setStrokeColor(ACCENT_DK)
-    c.setLineWidth(1.4)
-    c.line(ML, rule_y, PW - MR, rule_y)
-    y = rule_y - 12
-
-    def body(text, x, y, size=8, leading=10.5, color=INK, width=None, font="Times-Roman"):
-        c.setFillColor(color)
-        c.setFont(font, size)
-        for ln in wrap_text(c, text, font, size, width or (CW - 8)):
-            c.drawString(x, y, ln)
-            y -= leading
-        return y
-
-    def bullets(items, y, size=8.6, leading=11.2):
-        for b in items:
-            c.setFillColor(GOLD_DIM)
-            c.circle(ML + 10, y + 2, 1.6, fill=1, stroke=0)
-            y = body(b, ML + 16, y, size=size, leading=leading, width=CW - 22) - 2
-        return y
-
-    y = section_bar(c, y, "1  ·  BEFORE YOU START")
-    y -= 14
-    y = bullets([
-        f"Home Assistant {HA_MIN} or newer on the same network as the {name}.",
-        f"HACS (Home Assistant Community Store) installed. Instructions: {HACS_URL}",
-        f"{name} firmware {info['min_fw']} or newer (shown on the boot splash), already on your home Wi-Fi.",
-    ], y)
-    y -= 6
-
-    y = section_bar(c, y, "2  ·  INSTALL THE VIPER DYNAMICS INTEGRATION  (once per Home Assistant)")
-    y -= 10
-    rounded(c, ML, y - 30, CW, 30, 3, HexColor("#101820"), ACCENT, 1.1)
-    c.setFillColor(PARCH)
-    c.setFont("Times-Bold", 8)
-    c.drawString(ML + 10, y - 12, "Custom repository:")
-    c.setFillColor(GOLD)
-    c.setFont("Courier-Bold", 10)
-    c.drawString(ML + 100, y - 12, REPO_URL)
-    c.setFillColor(PARCH)
-    c.setFont("Times-Bold", 8)
-    c.drawString(ML + 10, y - 24, "Type:")
-    c.setFillColor(GOLD)
-    c.setFont("Times-Italic", 8)
-    c.drawString(ML + 100, y - 24, "Integration")
-    y -= 42
-    steps = [
-        "1.  Open HACS in Home Assistant.",
-        "2.  Three-dot menu (top right) → Custom repositories.",
-        "3.  Paste the address above, choose Integration, click Add.",
-        "4.  Search HACS for Viper Dynamics → Download.",
-        "5.  Settings → System → three-dot menu → Restart Home Assistant.",
-    ]
-    for s in steps:
-        y = body(s, ML + 10, y, size=9, leading=13)
-    y -= 10
-
-    y = section_bar(c, y, f"3  ·  ADD YOUR {name.upper()}")
-    y -= 8
-    col_w = (CW - 8) / 2
-    col_h = 108
-    ax = ML + col_w + 8
-    cards = [
-        (ML, GOOD, "It finds it for you  (recommended)", [
-            f"Power on the {name}.",
-            "Settings → Devices & services.",
-            f"Under Discovered: {info.get('ha_name', name)} ({info['host']}).",
-            "Click Add, then Submit. Done.",
-        ]),
-        (ax, HexColor("#1a3a5c"), "Or add it by address", [
-            "Settings → Devices & services.",
-            "Add integration → Viper Dynamics.",
-            f"Enter {info['host']}.local, or the IP",
-            "from the boot splash. Submit.",
-        ]),
-    ]
-    for x, colour, title, lines in cards:
-        rounded(c, x, y - col_h, col_w, col_h, 4, CARD, colour, 1.2)
-        c.setFillColor(colour)
-        c.rect(x, y - 16, col_w, 16, fill=1, stroke=0)
-        c.setFillColor(PARCH)
-        c.setFont("Times-Bold", 8)
-        c.drawCentredString(x + col_w / 2, y - 12, title)
-        yy = y - 32
-        c.setFont("Times-Roman", 8.8)
-        for i, s in enumerate(lines, 1):
-            for ln in wrap_text(c, f"{i}. {s}", "Times-Roman", 8.8, col_w - 16):
-                c.drawString(x + 8, yy, ln)
-                yy -= 13
-    y -= col_h + 12
-
-    y = section_bar(c, y, "4  ·  WHAT YOU CAN CONTROL")
-    y -= 12
-    plain = [s.replace("<b>", "").replace("</b>", "").replace("&amp;", "&") for s in info["controls"]]
-    y = bullets(plain, y, size=8.6, leading=11.2)
-    y -= 2
-    rounded(c, ML, y - 32, CW, 32, 3, HexColor("#142014"), GOOD, 1.1)
-    c.setFillColor(HexColor("#85ea2d"))
-    c.setFont("Times-Bold", 8.5)
-    c.drawString(ML + 8, y - 13, "Screen off:")
-    c.setFillColor(PARCH)
-    c.setFont("Times-Roman", 8.4)
-    wake = "tap the screen or raise brightness" if info.get("wake") == "touch" else "raise brightness"
-    c.drawString(ML + 64, y - 13, f"set Brightness to 0 (great for bedtime automations). To turn it back on, {wake}.")
-    c.drawString(ML + 64, y - 25, "A ringing alarm still lights the screen.")
-    y -= 44
-
-    y = section_bar(c, y, "5  ·  IF IT DOESN'T SHOW UP")
-    y -= 12
-    y = bullets([
-        "Restart Home Assistant after installing the integration; discovery starts after the restart.",
-        f"Home Assistant and the {name} must be on the same network (not a guest network or another VLAN).",
-        "Home Assistant in Docker needs host networking to see discovered devices. Or add the device by address.",
-        f"Check the firmware: {info['min_fw']} or newer is required. Update it from the web console first.",
-    ], y)
-
-    c.setFillColor(MUTED)
-    c.setFont("Times-Italic", 7)
-    c.drawString(ML, 16, "Integration: " + REPO_SHORT + "  ·  Support: viperdynamics.llc/support")
-    c.drawRightString(PW - MR, 16, "© Viper Dynamics LLC")
-    c.setFont("Times-Roman", 6.5)
-    c.drawCentredString(PW / 2, 7, "Home Assistant is a trademark of its owner. Viper Dynamics is not affiliated with Home Assistant.")
+    The quick start stays a one-page setup card; Home Assistant and other
+    advanced features live in the user manual.
+    """
+    c.saveState()
+    c.setFillColor(g["GOLD_DK"])
+    c.setFont("Times-BoldItalic", 7)
+    c.drawRightString(x_right, y, "Home Assistant & advanced features: see the user manual")
+    c.restoreState()
